@@ -1,9 +1,10 @@
 import pg from "pg";
+import { config } from "./config.js";
 
 export const pool = new pg.Pool({
-  user: "admin",
-  host: "postgres15",
-  password: "adm1nP4s5#",
-  database: "api-fast-code",
-  port: "5432",
+  user: config.pgUser,
+  host: config.pgHost,
+  password: config.pgPassword,
+  database: config.pgDatabase,
+  port: config.pgPort,
 });
