@@ -1,10 +1,10 @@
 import pg from "pg";
-import { config } from "./config.js";
+import { configdb } from "./config.js";
 
 export const pool = new pg.Pool({
-  user: config.pgUser,
-  host: config.pgHost,
-  password: config.pgPassword,
-  database: config.pgDatabase,
-  port: config.pgPort,
+  user: configdb.pgUser,
+  host: configdb.pgHost,
+  password: configdb.pgPassword,
+  database: configdb.pgDatabase,
+  port: configdb.pgPort,
 });

@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-export const config = {
+export const configdb = {
   pgUser: process.env.PG_USER,
   pgPassword: process.env.PG_PASSWORD,
   pgHost: process.env.PG_HOST,
@@ -10,4 +10,4 @@ export const config = {
   pgPort: process.env.PG_PORT,
 };
 
-export const PORT = 5173;
+export const PORT = process.env.APP_PORT || 5173;
