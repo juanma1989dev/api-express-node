@@ -1,5 +1,5 @@
-import { pool } from "src/db.js";
-import { UserDto } from "src/dtos/user.dto.js";
+import { pool } from "@/db.js";
+import { UserDto } from "@/dtos/user.dto.js";
 
 export default {
   getUsers: async () => {

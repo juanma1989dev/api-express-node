@@ -1,7 +1,7 @@
 import express from "express";
 import morgan from "morgan";
-import userRoutes from "src/routes/users.route";
-import { PORT } from "src/config";
+import userRoutes from "@/routes/users.route";
+import { PORT } from "@/config";
 
 const app = express();
 

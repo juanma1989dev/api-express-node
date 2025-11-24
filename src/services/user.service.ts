@@ -1,4 +1,4 @@
-import userRepository from "src/repositories/user.repository.js";
+import userRepository from "@/repositories/user.repository.js";
 
 export default {
   getUsers: () => userRepository.getUsers(),

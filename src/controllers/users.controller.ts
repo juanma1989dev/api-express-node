@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { UserDto } from "src/dtos/user.dto.js";
-import userService from "src/services/user.service.js";
+import { UserDto } from "@/dtos/user.dto.js";
+import userService from "@/services/user.service.js";
 
 export default {
   getUsers: async (req: Request, res: Response) => {
