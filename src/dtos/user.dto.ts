@@ -1,13 +1,17 @@
-import { IsEmail, IsNotEmpty, Length } from "class-validator";
-import { Transform } from "class-transformer";
+import { z } from "zod";
 
-export class UserDto {
-  @Length(3, 80, { message: "Name must be between 3 and 80 characters" })
-  @IsNotEmpty({ message: "Name is required" })
-  name!: string;
+export const UserDto = z.object({
+  name: z
+    .string()
+    .min(1, { message: "Name is required" })
+    .min(3, { message: "Name must be at least 3 characters" })
+    .max(80, { message: "Name must not exceed 80 characters" }),
 
-  @IsNotEmpty({ message: "Email is required" })
-  @IsEmail({}, { message: "Must be a valid email" })
-  @Transform(({ value }) => value.toLowerCase())
-  email!: string;
-}
+  email: z
+    .string()
+    .min(1, { message: "Email is required" })
+    .email({ message: "Must be a valid email" })
+    .transform((e) => e.toLowerCase()),
+});
+
+export type UserDto = z.infer<typeof UserDto>;
