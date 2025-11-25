@@ -17,8 +17,6 @@ La API está estructurada siguiendo un patrón de capas bien definido para separ
 
 - **Repositories (`src/repositories`)**: Abstraen el acceso a la base de datos. Proveen una interfaz clara para realizar operaciones CRUD (Crear, Leer, Actualizar, Borrar) sin exponer los detalles de la implementación de la base de datos.
 
-- **Inyección de Dependencias**: El proyecto está configurado para usar **InversifyJS**. Esto permite un bajo acoplamiento entre las capas, ya que las clases no crean sus propias dependencias, sino que se les "inyectan" en el momento de su creación.
-
 ## Tecnologías Utilizadas
 
 - **Runtime**: [Node.js](https://nodejs.org/)
@@ -26,7 +24,6 @@ La API está estructurada siguiendo un patrón de capas bien definido para separ
 - **Lenguaje**: [TypeScript](https://www.typescriptlang.org/)
 - **Base de Datos**: [PostgreSQL](https://www.postgresql.org/) (a través del driver `pg`)
 - **Gestor de Paquetes**: [pnpm](https://pnpm.io/)
-- **Inyección de Dependencias**: [InversifyJS](https://inversify.io/)
 - **Validación de Datos**: [class-validator](https://github.com/typestack/class-validator) para validación de DTOs.
 - **Variables de Entorno**: [dotenv](https://github.com/motdotla/dotenv)
 
