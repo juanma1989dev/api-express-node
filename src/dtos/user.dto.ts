@@ -1,12 +1,13 @@
-import { IsEmail, IsNotEmpty, IsString, Length } from 'class-validator';
+import { IsEmail, IsNotEmpty, Length } from "class-validator";
+import { Transform } from "class-transformer";
 
 export class UserDto {
-  @IsString({ message: 'name must be a string' })
-  @IsNotEmpty({ message: 'name is required' })
-  @Length(3, 80, { message: 'name must be between 3 and 80 characters' })
+  @Length(3, 80, { message: "Name must be between 3 and 80 characters" })
+  @IsNotEmpty({ message: "Name is required" })
   name!: string;
 
-  @IsEmail({}, { message: 'Must be a valid email' })
-  @IsNotEmpty({ message: 'email is required' })
+  @IsNotEmpty({ message: "Email is required" })
+  @IsEmail({}, { message: "Must be a valid email" })
+  @Transform(({ value }) => value.toLowerCase())
   email!: string;
 }
