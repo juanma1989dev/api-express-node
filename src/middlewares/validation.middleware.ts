@@ -1,61 +1,50 @@
-import { validate, ValidationError } from "class-validator";
-import { plainToInstance } from "class-transformer";
-import { Request, Response, NextFunction, RequestHandler } from "express";
+import { z } from "zod";
+import { Request, Response, NextFunction } from "express";
 
-export function validationMiddleware<T extends object>(
-  dtoClass: new () => T
-): RequestHandler {
-  return async (req: Request, res: Response, next: NextFunction) => {
-    const dto = plainToInstance(dtoClass, req.body);
+export const validateMiddleware = (schema: z.ZodTypeAny) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const body = req.body ?? {};
 
-    const errors = await validate(dto, {
-      whitelist: true,
-      forbidNonWhitelisted: false,
-      skipMissingProperties: false,
-    });
+    const result = schema.safeParse(body);
 
-    if (errors.length === 0) {
-      req.body = dto;
-      return next();
+    if (!result.success) {
+      const formattedErrors = formatZodErrors(result.error.issues);
+
+      return res.status(400).json({
+        success: false,
+        code: "VALIDATION_ERROR",
+        message: "Validation failed",
+        errors: formattedErrors,
+      });
     }
 
-    const formatted = formatErrorsWithCodes(errors);
-
-    return res.status(400).json({
-      success: false,
-      code: "VALIDATION_ERROR",
-      message: "Validation failed",
-      errors: formatted,
-    });
+    req.body = result.data;
+    next();
   };
-}
+};
 
-function formatErrorsWithCodes(errors: ValidationError[]) {
-  const result: Array<{ field: string; message: string }> = [];
+function formatZodErrors(issues: z.ZodIssue[]) {
+  const errors: Record<string, string[]> = {};
 
-  const traverse = (list: ValidationError[], parent?: string) => {
-    for (const error of list) {
-      const field = parent ? `${parent}.${error.property}` : error.property;
+  for (const issue of issues) {
+    const pathString = issue.path
+      .filter((p): p is string | number => typeof p !== "symbol")
+      .join(".");
 
-      if (error.constraints) {
-        const firstKey = Object.keys(error.constraints)[0];
-        const firstMessage = error.constraints[firstKey];
-        const code = `ERR_${firstKey.toUpperCase()}`;
+    const path = pathString || "_global";
+    if (!errors[path]) errors[path] = [];
 
-        result.push({
-          field,
-          message: firstMessage,
-          // code,
-        });
-      }
-
-      if (error.children?.length) {
-        traverse(error.children, field);
-      }
+    let message = issue.message;
+    if (
+      issue.code === "invalid_type" &&
+      message.includes("expected string, received undefined")
+    ) {
+      const fieldName = path.charAt(0).toUpperCase() + path.slice(1);
+      message = `${fieldName} is required`;
     }
-  };
 
-  traverse(errors);
+    errors[path].push(message);
+  }
 
-  return result;
+  return errors;
 }
