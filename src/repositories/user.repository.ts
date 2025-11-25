@@ -37,4 +37,12 @@ export default {
 
     return (result.rowCount ?? 0) > 0;
   },
+
+  getUserByEmail: async (email: string) => {
+    // crea la logica para recuperar el usuario por el email
+    const { rows } = await pool.query(`SELECT * FROM users WHERE email=$1`, [
+      email,
+    ]);
+    return rows[0] ?? null;
+  },
 };
