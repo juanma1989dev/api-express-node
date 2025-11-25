@@ -5,18 +5,14 @@ import { validateMiddleware } from "@/middlewares/validation.middleware";
 
 const router = Router();
 
-router.get("/users", UserController.getUsers);
+router.get("/", UserController.getUsers);
 
-router.get("/users/:id", UserController.getUser);
+router.get("/:id", UserController.getUser);
 
-router.post("/users", validateMiddleware(UserDto), UserController.createUser);
+router.post("/", validateMiddleware(UserDto), UserController.createUser);
 
-router.delete("/users/:id", UserController.deleteUser);
+router.delete("/:id", UserController.deleteUser);
 
-router.put(
-  "/users/:id",
-  validateMiddleware(UserDto),
-  UserController.updateUser
-);
+router.put("/:id", validateMiddleware(UserDto), UserController.updateUser);
 
 export default router;
