@@ -1,25 +1,36 @@
 import userRepository from "@/repositories/user.repository.js";
-import { AppError } from "@/utils/AppError";
+import { AppError } from "@/utils/AppError.js";
+import { UserDto } from "@/dtos/user.dto.js";
 
-export default {
-  getUsers: () => userRepository.getUsers(),
+export class UserService {
+  static async getUsers() {
+    return await userRepository.getUsers();
+  }
 
-  getUser: (id: number) => userRepository.getUser(id),
+  static async getUser(id: number) {
+    const user = await userRepository.getUser(id);
+    if (!user) throw new AppError("User not found", "USER_NOT_FOUND", 404);
+    return user;
+  }
 
-  createUser: async (data: any) => {
-    const user = await userRepository.getUserByEmail(data.email);
-    if (user) {
-      throw new AppError("El usuario ya existe", "USER_ALREADY_EXISTS", 409);
+  static async createUser(data: UserDto) {
+    const existingUser = await userRepository.getUserByEmail(data.email);
+    if (existingUser) {
+      throw new AppError("El usuario ya existe", "RECORD_ALREADY_EXISTS", 409);
     }
+    return await userRepository.createUser(data);
+  }
 
-    return userRepository.createUser(data);
-  },
+  static async updateUser(id: number, data: UserDto) {
+    const updatedUser = await userRepository.updateUser(id, data);
+    if (!updatedUser)
+      throw new AppError("User not found", "USER_NOT_FOUND", 404);
+    return updatedUser;
+  }
 
-  updateUser: (id: number, data: any) => {
-    return userRepository.updateUser(id, data);
-  },
-
-  deleteUser: (id: number) => {
-    return userRepository.deleteUser(id);
-  },
-};
+  static async deleteUser(id: number) {
+    const deleted = await userRepository.deleteUser(id);
+    if (!deleted) throw new AppError("User not found", "USER_NOT_FOUND", 404);
+    return { message: "Usuario eliminado correctamente" };
+  }
+}

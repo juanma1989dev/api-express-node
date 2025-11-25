@@ -1,42 +1,43 @@
 import { Request, Response } from "express";
+import { UserService } from "@/services/user.service";
+import { ApiResponse } from "@/utils/ApiResponse.js";
 import { UserDto } from "@/dtos/user.dto.js";
-import userService from "@/services/user.service.js";
 
-export default {
-  getUsers: async (req: Request, res: Response) => {
-    const users = await userService.getUsers();
-    res.json(users);
-  },
+export class UserController {
+  static async getUsers(req: Request, res: Response) {
+    const users = await UserService.getUsers();
+    return ApiResponse.success(res, users);
+  }
 
-  getUser: async (req: Request, res: Response) => {
-    const id = Number(req.params?.id);
-    const user = await userService.getUser(id);
+  static async getUser(req: Request, res: Response) {
+    const id = Number(req.params.id);
+    const user = await UserService.getUser(id);
+    return ApiResponse.success(res, user);
+  }
 
-    if (!user) return res.status(404).json({ message: "User not found" });
+  static async createUser(req: Request, res: Response) {
+    const user = await UserService.createUser(req.body as UserDto);
+    return ApiResponse.success(
+      res,
+      user,
+      "Usuario creado correctamente",
+      "CREATED",
+      201
+    );
+  }
 
-    res.json(user);
-  },
+  static async updateUser(req: Request, res: Response) {
+    const id = Number(req.params.id);
+    const updatedUser = await UserService.updateUser(id, req.body as UserDto);
+    return ApiResponse.success(
+      res,
+      updatedUser,
+      "Usuario actualizado correctamente"
+    );
+  }
 
-  createUser: async (req: Request, res: Response) => {
-    const user = await userService.createUser(req.body as UserDto);
-    res.status(201).json(user);
-  },
-
-  updateUser: async (req: Request, res: Response) => {
-    const id = Number(req.params?.id);
-    const user = await userService.updateUser(id, req.body as UserDto);
-
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    res.json(user);
-  },
-
-  deleteUser: async (req: Request, res: Response) => {
-    const id = Number(req.params?.id);
-    const deleted = await userService.deleteUser(id);
-
-    if (!deleted) return res.status(404).json({ message: "User not found" });
-
-    res.json({ message: "User deleted" });
-  },
-};
+  static async deleteUser(req: Request, res: Response) {
+    const result = await UserService.deleteUser(Number(req.params.id));
+    return ApiResponse.success(res, result);
+  }
+}
