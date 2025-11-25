@@ -1,7 +1,6 @@
-import { AppError } from "@/utils/AppError";
 import { Request, Response, NextFunction } from "express";
-import errorMap from "node_modules/zod/v3/locales/en.cjs";
-import { success } from "zod";
+import { AppError } from "@/utils/AppError.js";
+import { ApiResponse } from "@/utils/ApiResponse.js";
 
 export const handleErrorMiddleware = (
   err: Error,
@@ -10,16 +9,8 @@ export const handleErrorMiddleware = (
   next: NextFunction
 ) => {
   if (err instanceof AppError) {
-    return res.status(err.statusCode).json({
-      success: false,
-      code: err.code,
-      message: err.message,
-    });
+    return ApiResponse.error(res, err.message, err.code, err.statusCode);
   }
 
-  res.status(500).json({
-    success: false,
-    code: "INTERNAL_SERVER_ERROR",
-    message: "Algo salió mal",
-  });
+  return ApiResponse.error(res, "Algo salió mal", "INTERNAL_SERVER_ERROR", 500);
 };
