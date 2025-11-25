@@ -1,25 +1,61 @@
-import { validate, ValidationError } from 'class-validator';
-import { plainToClass } from 'class-transformer';
-import { Request, Response, NextFunction, RequestHandler } from 'express';
+import { validate, ValidationError } from "class-validator";
+import { plainToInstance } from "class-transformer";
+import { Request, Response, NextFunction, RequestHandler } from "express";
 
-export function validationMiddleware<T>(type: any): RequestHandler {
-  return (req: Request, res: Response, next: NextFunction) => {
-    // Transforma el body (plain object) a una instancia de nuestra clase DTO
-    const dto = plainToClass(type, req.body);
-    
-    // Valida la instancia del DTO
-    validate(dto).then((errors: ValidationError[]) => {
-      if (errors.length > 0) {
-        // Extrae los mensajes de error
-        const message = errors
-          .flatMap((error: ValidationError) => (error.constraints ? Object.values(error.constraints) : []))
-          .join(', ');
-        res.status(400).json({ message });
-      } else {
-        // Si no hay errores, la solicitud continúa
-        req.body = dto; // Opcional: sobreescribe el body con la instancia del DTO
-        next();
-      }
+export function validationMiddleware<T extends object>(
+  dtoClass: new () => T
+): RequestHandler {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    const dto = plainToInstance(dtoClass, req.body);
+
+    const errors = await validate(dto, {
+      whitelist: true,
+      forbidNonWhitelisted: false,
+      skipMissingProperties: false,
+    });
+
+    if (errors.length === 0) {
+      req.body = dto;
+      return next();
+    }
+
+    const formatted = formatErrorsWithCodes(errors);
+
+    return res.status(400).json({
+      success: false,
+      code: "VALIDATION_ERROR",
+      message: "Validation failed",
+      errors: formatted,
     });
   };
+}
+
+function formatErrorsWithCodes(errors: ValidationError[]) {
+  const result: Array<{ field: string; message: string }> = [];
+
+  const traverse = (list: ValidationError[], parent?: string) => {
+    for (const error of list) {
+      const field = parent ? `${parent}.${error.property}` : error.property;
+
+      if (error.constraints) {
+        const firstKey = Object.keys(error.constraints)[0];
+        const firstMessage = error.constraints[firstKey];
+        const code = `ERR_${firstKey.toUpperCase()}`;
+
+        result.push({
+          field,
+          message: firstMessage,
+          // code,
+        });
+      }
+
+      if (error.children?.length) {
+        traverse(error.children, field);
+      }
+    }
+  };
+
+  traverse(errors);
+
+  return result;
 }
